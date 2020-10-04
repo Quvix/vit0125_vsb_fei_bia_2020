@@ -26,7 +26,40 @@ def blind_search(d, g_max, np, min, max, function):
 
     return args
 
+def hill_climbing(d, g_max, np, min, max, function, sigma = 0.1):
+    def generate_neighbors(x):
+        neighbors = []
 
+        normals = []
+
+        for i in range(len(x)):
+            normals.append(numpy.random.normal(x[i], sigma, np))
+
+        for i in range(np):
+            p = []
+            for j in range(len(x)):
+                p.append(normals[j][i])
+
+            neighbors.append(p)
+        return neighbors
+
+
+    result = list()
+
+    x0 = [random.uniform(min, max) for x in range(d)]
+    fitness = function(x0)
+
+    for i in range(g_max):
+        for nb in generate_neighbors(x0):
+            val = function(nb)
+
+            if val < fitness:
+                x0 = nb
+                fitness = val
+
+        result.append(x0)
+
+    return result
 
 
 
