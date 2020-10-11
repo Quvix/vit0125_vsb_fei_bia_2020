@@ -44,8 +44,8 @@ class Solution:
         self.print_graph()
         plt.show()
 
-    def find_minimum(self, g_max, np):
-        self.tmp = self.algorithm(self.d, g_max, np, self.min, self.max, self.f)
+    def find_minimum(self, aargs=()):
+        self.tmp = self.algorithm(self.d, self.min, self.max, self.f, *aargs)
         return self.tmp[-1]
 
     def animate(self, i):
