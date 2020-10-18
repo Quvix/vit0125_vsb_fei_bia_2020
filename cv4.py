@@ -1,6 +1,8 @@
 import random
 import math
 import copy
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 def generateCities(n, min, max):
     return [(random.uniform(min, max), random.uniform(min, max)) for x in range(n)]
@@ -27,8 +29,6 @@ def evaluate(individual):
 
     return sum
 
-#print([evaluate(x) for x in generatePopulation(generateCities(10, 0, 100), 10)])
-
 def mutate(individual):
     if random.random() < 0.5:
         idx = range(len(individual))
@@ -45,14 +45,29 @@ def offspring(parent_A, parent_B):
     return slice + [x for x in parent_B if x not in slice]
 
 
+def animate(i, l, points):
+    print(i)
+    a = list(map(list, zip(*result[i])))
+    l.set_data(a[0], a[1])
 
-NP = 20
-G = 2000
+def getBest(population):
+    best = population[0]
+    for e in population:
+        if evaluate(e) < evaluate(best):
+            best = e
+    return best
+
+
+
+MIN = 0
+MAX = 100
+NP = 100
+G = 10
 D = 20
 
-cities = generateCities(D, 0, 100)
+result = []
+cities = generateCities(D, MIN, MAX)
 population = generatePopulation(cities, NP)
-print([evaluate(x) for x in population])
 
 for i in range(G):
     new_population = copy.deepcopy(population)
@@ -65,7 +80,16 @@ for i in range(G):
             new_population[j] = offspring_AB
 
     population = new_population
+    result.append(getBest(population))
 
-print([evaluate(x) for x in population])
+
+fig = plt.figure()
+ax = plt.axes(xlim=(MIN, MAX), ylim=(MIN, MAX))
+l, = plt.plot([], [], '-o')
+anim = animation.FuncAnimation(fig, animate, frames=len(result), interval=100, fargs=(l, [result]))
+anim.save("ga_tsp_{0}gen.gif".format(len(result)), writer='pillow')
+
+
+
 
 
