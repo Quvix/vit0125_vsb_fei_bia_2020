@@ -1,5 +1,6 @@
 import random
 import numpy
+import copy
 
 def blind_search(d, min, max, function, g_max, np):
     def generate():
@@ -20,9 +21,9 @@ def blind_search(d, min, max, function, g_max, np):
                 arg_best = arg
 
         if arg_best is not None:
-            args.append(arg_best)
+            args.append([arg_best])
         else:
-            args.append(args[-1])
+            args.append([args[-1]])
 
     return args
 
@@ -57,7 +58,7 @@ def hill_climbing(d, min, max, function, g_max, np, sigma = 0.1):
                 x0 = nb
                 fitness = val
 
-        result.append(x0)
+        result.append([x0])
 
     return result
 
@@ -69,7 +70,7 @@ def simulated_annealing(d, min, max, function, t_zero = 100, t_min = 0.5, alpha 
     t = t_zero
     result = list()
     x = [random.uniform(min, max) for x in range(d)]
-    result.append(x)
+    result.append([x])
 
     while t > t_min:
         x_1 = get_neighbor(x)
@@ -91,7 +92,50 @@ def simulated_annealing(d, min, max, function, t_zero = 100, t_min = 0.5, alpha 
                 x = x_1
 
         t = t * alpha
-        result.append(x)
+        result.append([x])
+
+    return result
+
+def differential_evolution(d, min, max, function, g_max, np, f = 0.5, cr = 0.5):
+    def generate_population():
+        population = []
+        for i in range(np):
+            population.append([random.uniform(min, max) for x in range(d)])
+
+        return population
+
+    def get_random_parent(population, exclude):
+        return random.choice([e for e in range(len(population)) if e not in exclude])
+
+    result = []
+    pop = generate_population()
+    for g in range(g_max):
+        new_population = copy.deepcopy(pop)
+
+        for i, x in enumerate(pop):
+            r1_i = get_random_parent(new_population, [x])
+            r2_i = get_random_parent(new_population, [x, r1_i])
+            r3_i = get_random_parent(new_population, [x, r1_i, r2_i])
+
+            r1 = numpy.array(new_population[r1_i])
+            r2 = numpy.array(new_population[r2_i])
+            r3 = numpy.array(new_population[r3_i])
+
+            v = list((r1 - r2) * f + r3)
+            u = numpy.zeros(d)
+            j_rnd = numpy.random.randint(0, d)
+
+            for j in range(d):
+                if numpy.random.uniform() < cr or j == j_rnd:
+                    u[j] = v[j]
+                else:
+                    u[j] = x[j]
+
+            if function(u) <= function(x):
+                new_population[i] = list(u)
+
+        result.append(copy.deepcopy(new_population))
+        pop = new_population
 
     return result
 

@@ -17,7 +17,7 @@ class Solution:
         self.ax = Axes3D(self.fig)
         self.init_params()
         self.tmp = []
-        self.point = None
+        self.points = []
 
 
     def init_params(self):
@@ -54,13 +54,13 @@ class Solution:
 
         print("animating #" + str(i))
 
-        p = self.tmp[i]
-        if self.point is not None:
-            for x in self.point:
+        for point in self.points:
+            for x in point:
                 x.remove()
-            self.point = None
+        self.points = []
 
-        self.point = self.ax.plot(p[0], p[1], self.f(p), 'ro')
+        for p in self.tmp[i]:
+            self.points.append(self.ax.plot(p[0], p[1], self.f(p), 'ro'))
 
     def save_anim(self):
         if self.d != 2:
