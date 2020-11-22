@@ -139,3 +139,40 @@ def differential_evolution(d, min, max, function, g_max, np, f = 0.5, cr = 0.5):
 
     return result
 
+def firefly(d, min_, max, function, g_max, np, alpha = 0.3, b_0 = 1):
+    def generate_population():
+        population = []
+        for i in range(np):
+            population.append(numpy.array([random.uniform(min_, max) for x in range(d)]))
+
+        return population
+
+    def distance(a, b):
+        return numpy.linalg.norm(a - b)
+
+    def get_best(pop, lights):
+        return pop[lights.index(min(lights))]
+
+    def get_light_intensities(p):
+        return [function(x) for x in p]
+
+    def normal():
+        return numpy.array([numpy.random.normal(e, 0.1) for e in range(d)])
+
+    result = []
+    pop = generate_population()
+    lights = get_light_intensities(pop)
+
+    for g in range(g_max):
+        for i in range(np):
+            for j in range(np):
+                if(lights[i] > lights[j]):
+                    pop[i] = pop[i] + (b_0 / (1 + distance(pop[i], pop[j]))) * (pop[j] - pop[i]) + alpha * normal()
+
+                lights[i] = function(pop[i])
+
+        result.append([list(get_best(pop, lights))])
+
+    return result
+
+
